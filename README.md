@@ -18,14 +18,27 @@ img/          20 ambalaj görseli (1100 px JPEG)
 
 1. Bu repoyu Vercel'de **Add New → Project** ile içe aktar. Framework: **Other**,
    build komutu yok, output dizini kök. Deploy et.
-2. Oyların kalıcı olması için projede **Storage → Create Database → Upstash for Redis**
-   seç ve projeye bağla. Vercel `KV_REST_API_URL` ve `KV_REST_API_TOKEN`
-   değişkenlerini otomatik ekler.
-3. Depolamayı bağladıktan sonra **Redeploy** et. Sayfadaki "Oylar kaydedilmiyor"
-   uyarısı kaybolduğunda hazırdır.
+2. Oyların kalıcı olması için bir GitHub token'ı ver:
+   - GitHub → **Settings → Developer settings → Personal access tokens →
+     Fine-grained tokens → Generate new token**
+   - Repository access: sadece **Odiway/forms**
+   - Permissions → Repository permissions → **Contents: Read and write**
+   - Oluşan token'ı Vercel'de **Settings → Environment Variables** altına
+     `GH_TOKEN` adıyla ekle (Production + Preview).
+3. **Redeploy** et. Sayfadaki "Oylar kaydedilmiyor" uyarısı kaybolduğunda hazırdır.
 
 Depolama bağlanmadan sayfa yine açılır ve tasarımlar görünür, sadece oy kaydedilmez —
 sayfa bunu üstte açıkça yazar.
+
+## Oylar nerede duruyor
+
+Bu deponun **`veri`** dalındaki `oylar.json` dosyasında. Her oy bu dosyaya bir commit
+olarak düşer; geçmişi GitHub'dan görebilir, dosyayı indirip Excel'e taşıyabilirsin.
+`vercel.json` bu dal için dağıtımı kapatır, böylece her oy siteyi yeniden kurmaz.
+
+Ücretli bir servise gerek yok. İstersen Upstash Redis de kullanabilirsin: projeye
+`KV_REST_API_URL` ve `KV_REST_API_TOKEN` eklenirse kod otomatik olarak onu tercih eder
+(`GH_TOKEN` yoksa).
 
 ## API
 
@@ -36,8 +49,8 @@ sayfa bunu üstte açıkça yazar.
 | `DELETE /api/oy?ad=Elif` | Tek bir oyu siler |
 | `DELETE /api/oy?hepsi=1` | Oylamayı sıfırlar |
 
-Oylar Redis'te `coffon:oylar` anahtarında, oy verenin adına göre tutulur; aynı isimle
-ikinci kez oy verilirse önceki kayıt güncellenir.
+Oylar oy verenin adına göre tutulur; aynı isimle ikinci kez oy verilirse önceki kayıt
+güncellenir. Aynı anda gelen oylarda çakışma olursa istek birkaç kez yeniden denenir.
 
 ## Yerelde çalıştırma
 
@@ -45,4 +58,4 @@ ikinci kez oy verilirse önceki kayıt güncellenir.
 npx vercel dev
 ```
 
-Depolama değişkenleri yoksa sayfa "kaydedilmiyor" modunda açılır.
+`GH_TOKEN` yoksa sayfa "kaydedilmiyor" modunda açılır.
